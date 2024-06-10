@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using CoffeeShop.Data;
 using Microsoft.EntityFrameworkCore;
+using CoffeeShop.Services;
 
 namespace CoffeeShop
 {
@@ -22,8 +23,11 @@ namespace CoffeeShop
             services.AddDbContext<CoffeeShopContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
+            services.AddScoped<ProductService>(); // Register ProductService
+
             services.AddControllersWithViews();
         }
+
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {

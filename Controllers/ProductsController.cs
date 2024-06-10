@@ -1,24 +1,25 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using CoffeeShop.Data;
 using CoffeeShop.Models;
+using CoffeeShop.Services;
 using System.Threading.Tasks;
 
 namespace CoffeeShop.Controllers
 {
     public class ProductsController : Controller
     {
-        private readonly CoffeeShopContext _context;
+        private readonly ProductService _productService;
 
-        public ProductsController(CoffeeShopContext context)
+        public ProductsController(ProductService productService)
         {
-            _context = context;
+            _productService = productService;
         }
 
         // GET: Products
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Products.ToListAsync());
+            var products = await _productService.GetAllProductsAsync();
+            return View(products);
         }
 
         // GET: Products/Create
@@ -34,8 +35,7 @@ namespace CoffeeShop.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(product);
-                await _context.SaveChangesAsync();
+                await _productService.AddProductAsync(product);
                 return RedirectToAction(nameof(Index));
             }
             return View(product);
@@ -49,7 +49,7 @@ namespace CoffeeShop.Controllers
                 return NotFound();
             }
 
-            var product = await _context.Products.FindAsync(id);
+            var product = await _productService.GetProductByIdAsync(id.Value);
             if (product == null)
             {
                 return NotFound();
@@ -71,12 +71,11 @@ namespace CoffeeShop.Controllers
             {
                 try
                 {
-                    _context.Update(product);
-                    await _context.SaveChangesAsync();
+                    await _productService.UpdateProductAsync(product);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProductExists(product.Id))
+                    if (!_productService.ProductExists(product.Id))
                     {
                         return NotFound();
                     }
@@ -98,8 +97,7 @@ namespace CoffeeShop.Controllers
                 return NotFound();
             }
 
-            var product = await _context.Products
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var product = await _productService.GetProductByIdAsync(id.Value);
             if (product == null)
             {
                 return NotFound();
@@ -113,15 +111,8 @@ namespace CoffeeShop.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var product = await _context.Products.FindAsync(id);
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
+            await _productService.DeleteProductAsync(id);
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool ProductExists(int id)
-        {
-            return _context.Products.Any(e => e.Id == id);
         }
     }
 }
