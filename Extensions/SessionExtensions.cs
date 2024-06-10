@@ -8,9 +8,9 @@ public static class SessionExtensions
         session.SetString(key, JsonConvert.SerializeObject(value));
     }
 
-    public static T GetObjectFromJson<T>(this ISession session, string key)
+    public static T? GetObjectFromJson<T>(this ISession session, string key) where T : class
     {
         var value = session.GetString(key);
-        return value == null ? default(T) : JsonConvert.DeserializeObject<T>(value);
+        return value == null ? null : JsonConvert.DeserializeObject<T>(value);
     }
 }
