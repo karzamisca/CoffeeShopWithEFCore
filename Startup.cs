@@ -1,59 +1,53 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using CoffeeShop.Data;
-using Microsoft.EntityFrameworkCore;
+﻿using CoffeeShop.Data;
 using CoffeeShop.Services;
+using Microsoft.EntityFrameworkCore;
 
-namespace CoffeeShop
+public class Startup
 {
-    public class Startup
+    public Startup(IConfiguration configuration)
     {
-        public IConfiguration Configuration { get; }
+        Configuration = configuration;
+    }
 
-        public Startup(IConfiguration configuration)
+    public IConfiguration Configuration { get; }
+
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddDbContext<CoffeeShopContext>(options =>
+            options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+        services.AddScoped<ProductService>(); // Register ProductService
+
+        services.AddControllersWithViews();
+        services.AddSession(); // Add session services
+    }
+
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        if (!env.IsDevelopment())
         {
-            Configuration = configuration;
+            app.UseExceptionHandler("/Home/Error");
+            app.UseHsts();
         }
 
-        public void ConfigureServices(IServiceCollection services)
+        app.UseHttpsRedirection();
+        app.UseStaticFiles();
+
+        app.UseRouting();
+
+        app.UseSession(); // Use session middleware
+
+        app.UseAuthorization();
+
+        app.UseEndpoints(endpoints =>
         {
-            services.AddDbContext<CoffeeShopContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            endpoints.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Store}/{action=Index}/{id?}");
 
-            services.AddScoped<ProductService>(); // Register ProductService
-
-            services.AddControllersWithViews();
-        }
-
-
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Home/Error");
-                app.UseHsts();
-            }
-
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
-
-            app.UseRouting();
-
-            app.UseAuthorization();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
-            });
-        }
+            endpoints.MapControllerRoute(
+                name: "admin",
+                pattern: "Admin/{controller=Products}/{action=Index}/{id?}");
+        });
     }
 }
