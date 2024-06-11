@@ -11,7 +11,13 @@
         <ul>
             @foreach (var item in Model)
             {
-                <li>@item.Name - $@item.Price</li>
+                <li>
+                    @item.Name - $@item.Price
+                    <button class="btn btn-sm btn-primary" onclick="decrementItem('@item.Id')">-</button>
+                    <span id="quantity_@item.Id">@item.Quantity</span>
+                    <button class="btn btn-sm btn-primary" onclick="incrementItem('@item.Id')">+</button>
+                    <button class="btn btn-sm btn-danger" onclick="removeItem('@item.Id')">Remove</button>
+                </li>
             }
         </ul>
         <button class="btn btn-danger" onclick="clearCart()">Clear Cart</button>
@@ -42,9 +48,28 @@
         right: 20px;
     }
 </style>
+
 <script>
     function clearCart() {
         $.post('/Store/ClearCart', function (data) {
+            $('#cartContainer').html(data);
+        });
+    }
+
+    function incrementItem(productId) {
+        $.post('/Store/IncrementItem', { productId: productId }, function (data) {
+            $('#cartContainer').html(data);
+        });
+    }
+
+    function decrementItem(productId) {
+        $.post('/Store/DecrementItem', { productId: productId }, function (data) {
+            $('#cartContainer').html(data);
+        });
+    }
+
+    function removeItem(productId) {
+        $.post('/Store/RemoveItem', { productId: productId }, function (data) {
             $('#cartContainer').html(data);
         });
     }

@@ -12,5 +12,6 @@ namespace CoffeeShop.Models
         [Required]
         [Range(0.01, 1000.00)]
         public decimal Price { get; set; }
+        public int Quantity { get; set; }
     }
 }
