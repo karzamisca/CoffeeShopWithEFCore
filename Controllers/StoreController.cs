@@ -72,5 +72,45 @@ namespace CoffeeShop.Controllers
             // Return the updated cart view
             return PartialView("_CartPartial", cart);
         }
+
+        [HttpPost]
+        public IActionResult IncrementItem(int productId)
+        {
+            var cart = HttpContext.Session.GetObjectFromJson<List<Product>>("Cart") ?? new List<Product>();
+            var item = cart.FirstOrDefault(p => p.Id == productId);
+            if (item != null)
+            {
+                item.Quantity++;
+                HttpContext.Session.SetObjectAsJson("Cart", cart);
+            }
+            return PartialView("_CartPartial", cart);
+        }
+
+        [HttpPost]
+        public IActionResult DecrementItem(int productId)
+        {
+            var cart = HttpContext.Session.GetObjectFromJson<List<Product>>("Cart") ?? new List<Product>();
+            var item = cart.FirstOrDefault(p => p.Id == productId);
+            if (item != null && item.Quantity > 1)
+            {
+                item.Quantity--;
+                HttpContext.Session.SetObjectAsJson("Cart", cart);
+            }
+            return PartialView("_CartPartial", cart);
+        }
+
+        [HttpPost]
+        public IActionResult RemoveItem(int productId)
+        {
+            var cart = HttpContext.Session.GetObjectFromJson<List<Product>>("Cart") ?? new List<Product>();
+            var item = cart.FirstOrDefault(p => p.Id == productId);
+            if (item != null)
+            {
+                cart.Remove(item);
+                HttpContext.Session.SetObjectAsJson("Cart", cart);
+            }
+            return PartialView("_CartPartial", cart);
+        }
+
     }
 }
