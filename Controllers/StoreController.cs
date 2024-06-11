@@ -57,5 +57,20 @@ namespace CoffeeShop.Controllers
         {
             HttpContext.Session.SetObjectAsJson("Cart", cart);
         }
+        [HttpPost]
+        public IActionResult ClearCart()
+        {
+            // Get the cart from the session
+            var cart = HttpContext.Session.GetObjectFromJson<List<Product>>("Cart") ?? new List<Product>();
+
+            // Clear the contents of the cart
+            cart.Clear();
+
+            // Save the empty cart back to the session
+            HttpContext.Session.SetObjectAsJson("Cart", cart);
+
+            // Return the updated cart view
+            return PartialView("_CartPartial", cart);
+        }
     }
 }

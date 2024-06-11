@@ -14,13 +14,14 @@
                 <li>@item.Name - $@item.Price</li>
             }
         </ul>
+        <button class="btn btn-danger" onclick="clearCart()">Clear Cart</button>
     }
 </div>
 
 <style>
     .cart {
         position: fixed;
-        right: -300px;
+        right: -400px;
         top: 0;
         width: 300px;
         height: 100%;
@@ -41,3 +42,10 @@
         right: 20px;
     }
 </style>
+<script>
+    function clearCart() {
+        $.post('/Store/ClearCart', function (data) {
+            $('#cartContainer').html(data);
+        });
+    }
+</script>
