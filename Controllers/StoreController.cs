@@ -32,9 +32,10 @@ namespace CoffeeShop.Controllers
             if (product != null)
             {
                 _cartService.AddToCart(product);
+                var cart = _cartService.GetCart();
+                return PartialView("_CartPartial", cart);
             }
-            var cart = _cartService.GetCart();
-            return PartialView("_CartPartial", cart);
+            return NotFound();
         }
 
         // GET: Store/GetCart

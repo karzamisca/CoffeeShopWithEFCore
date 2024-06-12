@@ -20,9 +20,10 @@ namespace CoffeeShop.Services
             return await _context.Products.ToListAsync();
         }
 
-        public async Task<Product> GetProductByIdAsync(int id)
+        public async Task<Product?> GetProductByIdAsync(int id)
         {
-            return await _context.Products.FindAsync(id);
+            var product = await _context.Products.FindAsync(id);
+            return product ?? null; // Explicitly returning null to handle the warning.
         }
 
         public async Task AddProductAsync(Product product)
