@@ -13,13 +13,22 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
+        // Register the CoffeeShopContext with SQL Server
         services.AddDbContext<CoffeeShopContext>(options =>
             options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
+        // Register services
         services.AddScoped<ProductService>(); // Register ProductService
+        services.AddScoped<CartService>(); // Register CartService
 
+        // Add session services
+        services.AddSession();
+
+        // Add controllers with views
         services.AddControllersWithViews();
-        services.AddSession(); // Add session services
+
+        // Add HttpContextAccessor for session handling in CartService
+        services.AddHttpContextAccessor();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

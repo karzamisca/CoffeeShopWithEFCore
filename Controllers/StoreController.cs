@@ -9,10 +9,12 @@ namespace CoffeeShop.Controllers
     public class StoreController : Controller
     {
         private readonly ProductService _productService;
+        private readonly CartService _cartService;
 
-        public StoreController(ProductService productService)
+        public StoreController(ProductService productService, CartService cartService)
         {
             _productService = productService;
+            _cartService = cartService;
         }
 
         // GET: Store
@@ -24,93 +26,55 @@ namespace CoffeeShop.Controllers
 
         // POST: Store/AddToCart
         [HttpPost]
-        public IActionResult AddToCart(int productId)
+        public async Task<IActionResult> AddToCart(int productId)
         {
-            var cart = GetOrCreateCart();
-            var product = _productService.GetProductByIdAsync(productId).Result;
+            var product = await _productService.GetProductByIdAsync(productId);
             if (product != null)
             {
-                cart.Add(product);
-                SaveCart(cart);
+                _cartService.AddToCart(product);
             }
+            var cart = _cartService.GetCart();
             return PartialView("_CartPartial", cart);
         }
 
         // GET: Store/GetCart
         public IActionResult GetCart()
         {
-            var cart = GetOrCreateCart();
+            var cart = _cartService.GetCart();
             return PartialView("_CartPartial", cart);
         }
 
-        private List<Product> GetOrCreateCart()
-        {
-            var cart = HttpContext.Session.GetObjectFromJson<List<Product>>("Cart");
-            if (cart == null)
-            {
-                cart = new List<Product>();
-            }
-            return cart;
-        }
-
-        private void SaveCart(List<Product> cart)
-        {
-            HttpContext.Session.SetObjectAsJson("Cart", cart);
-        }
+        // POST: Store/ClearCart
         [HttpPost]
         public IActionResult ClearCart()
         {
-            // Get the cart from the session
-            var cart = HttpContext.Session.GetObjectFromJson<List<Product>>("Cart") ?? new List<Product>();
-
-            // Clear the contents of the cart
-            cart.Clear();
-
-            // Save the empty cart back to the session
-            HttpContext.Session.SetObjectAsJson("Cart", cart);
-
-            // Return the updated cart view
+            _cartService.ClearCart();
+            var cart = _cartService.GetCart();
             return PartialView("_CartPartial", cart);
         }
 
         [HttpPost]
         public IActionResult IncrementItem(int productId)
         {
-            var cart = HttpContext.Session.GetObjectFromJson<List<Product>>("Cart") ?? new List<Product>();
-            var item = cart.FirstOrDefault(p => p.Id == productId);
-            if (item != null)
-            {
-                item.Quantity++;
-                HttpContext.Session.SetObjectAsJson("Cart", cart);
-            }
+            _cartService.IncrementItem(productId);
+            var cart = _cartService.GetCart();
             return PartialView("_CartPartial", cart);
         }
 
         [HttpPost]
         public IActionResult DecrementItem(int productId)
         {
-            var cart = HttpContext.Session.GetObjectFromJson<List<Product>>("Cart") ?? new List<Product>();
-            var item = cart.FirstOrDefault(p => p.Id == productId);
-            if (item != null && item.Quantity > 1)
-            {
-                item.Quantity--;
-                HttpContext.Session.SetObjectAsJson("Cart", cart);
-            }
+            _cartService.DecrementItem(productId);
+            var cart = _cartService.GetCart();
             return PartialView("_CartPartial", cart);
         }
 
         [HttpPost]
         public IActionResult RemoveItem(int productId)
         {
-            var cart = HttpContext.Session.GetObjectFromJson<List<Product>>("Cart") ?? new List<Product>();
-            var item = cart.FirstOrDefault(p => p.Id == productId);
-            if (item != null)
-            {
-                cart.Remove(item);
-                HttpContext.Session.SetObjectAsJson("Cart", cart);
-            }
+            _cartService.RemoveItem(productId);
+            var cart = _cartService.GetCart();
             return PartialView("_CartPartial", cart);
         }
-
     }
 }
