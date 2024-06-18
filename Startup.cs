@@ -15,7 +15,7 @@ public class Startup
     {
         // Register the CoffeeShopContext with SQL Server
         services.AddDbContext<CoffeeShopContext>(options =>
-            options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            options.UseSqlServer(Environment.GetEnvironmentVariable("SQLSERVER_CONNECTION_STRING")));
 
         // Register services
         services.AddScoped<ProductService>(); // Register ProductService
