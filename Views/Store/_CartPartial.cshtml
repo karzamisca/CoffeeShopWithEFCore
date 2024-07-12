@@ -1,0 +1,81 @@
+﻿@model List<CoffeeShop.Models.Product>
+
+<div id="cart" class="cart">
+    <h2>Your Cart</h2>
+    @if (Model == null || !Model.Any())
+    {
+        <p>Your cart is empty.</p>
+    }
+    else
+    {
+        <ul>
+            @foreach (var item in Model)
+            {
+                <li>
+                    @item.Name - $@item.Price
+                    <button class="btn btn-sm btn-primary" onclick="decrementItem('@item.Id')">-</button>
+                    <span id="quantity_@item.Id">@item.Quantity</span>
+                    <button class="btn btn-sm btn-primary" onclick="incrementItem('@item.Id')">+</button>
+                    <button class="btn btn-sm btn-danger" onclick="removeItem('@item.Id')">Remove</button>
+                </li>
+            }
+        </ul>
+        <button class="btn btn-danger" onclick="clearCart()">Clear Cart</button>
+    }
+</div>
+
+<style>
+    .cart {
+        position: fixed;
+        right: -400px;
+        top: 60px;
+        width: 300px;
+        height: 100%;
+        background-color: white;
+        box-shadow: -2px 0 5px rgba(0,0,0,0.5);
+        overflow: auto;
+        transition: right 0.3s;
+        padding: 20px;
+    }
+
+        .cart.open {
+            right: 0;
+        }
+
+    #toggleCartBtn {
+        position: fixed;
+        top: 50px;
+        right: 250px;
+    }
+</style>
+
+<script>
+    function updateCartContent(data) {
+        $('#cartContainer').html(data);
+        $('#cart').addClass('open');
+    }
+
+    function clearCart() {
+        $.post('/Store/ClearCart', function (data) {
+            updateCartContent(data);
+        });
+    }
+
+    function incrementItem(productId) {
+        $.post('/Store/IncrementItem', { productId: productId }, function (data) {
+            updateCartContent(data);
+        });
+    }
+
+    function decrementItem(productId) {
+        $.post('/Store/DecrementItem', { productId: productId }, function (data) {
+            updateCartContent(data);
+        });
+    }
+
+    function removeItem(productId) {
+        $.post('/Store/RemoveItem', { productId: productId }, function (data) {
+            updateCartContent(data);
+        });
+    }
+</script>

@@ -1,0 +1,58 @@
+﻿@model IEnumerable<CoffeeShop.Models.Product>
+
+@{
+    ViewData["Title"] = "Storefront";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Storefront</h1>
+
+<div class="row">
+    @foreach (var product in Model)
+    {
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">@product.Name</h5>
+                    <p class="card-text">$@product.Price</p>
+                    <button class="btn btn-primary" onclick="addToCart(@product.Id)">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div id="cartContainer"></div>
+<!-- Use Font Awesome icon for the toggle cart button -->
+<button class="btn btn-secondary" onclick="toggleCart()" id="toggleCartBtn">
+    <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+</button>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    function addToCart(productId) {
+        $.post('/Store/AddToCart', { productId: productId }, function (data) {
+            $('#cartContainer').html(data);
+            openCart();
+        });
+    }
+
+    function toggleCart() {
+        $('#cart').toggleClass('open');
+    }
+
+    function openCart() {
+        $('#cart').addClass('open');
+    }
+
+    function closeCart() {
+        $('#cart').removeClass('open');
+    }
+
+    $(document).ready(function () {
+        // Ensure the cart is loaded even if empty
+        $.get('/Store/GetCart', function (data) {
+            $('#cartContainer').html(data);
+        });
+    });
+</script>
